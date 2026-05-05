@@ -211,7 +211,7 @@ Optimization:
 - Replace streaming with batch load if real-time not needed
 
 
-## ⚠️ Key Challenges Solved
+### ⚠️ Key Challenges Solved
 Problem	                  Solution
 LLM hallucinations	 Schema Validator
 Missing fields	         Clarifier Agent
@@ -220,7 +220,7 @@ Bad pipelines	         Intent-aware Expander
 Cost inaccuracies	 Deterministic pricing
 
 
-## 🧠 Key Learnings
+### 🧠 Key Learnings
 ❌ LLMs are not reliable structured parsers
 ✅ Always use validation layer
 ❌ Don’t rely only on rules
@@ -229,7 +229,7 @@ Cost inaccuracies	 Deterministic pricing
 ✅ Ask only cost-critical questions
 
 
-## 🚀 Current Status
+### 🚀 Current Status
 Component	Status
 Intent Agent	✅ Stable
 Parser	        ✅ Stable
