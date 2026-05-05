@@ -1,5 +1,5 @@
-📊 Intelligent Multi-Agent FinOps & Architecture Optimization System
-🚀 Overview
+# 📊 Intelligent Multi-Agent FinOps & Architecture Optimization System
+## 🚀 Overview
 
 This project is an AI-powered multi-agent system that analyzes cloud architecture descriptions and generates:
 
@@ -13,7 +13,7 @@ It helps users understand:
 
 “How much will my cloud architecture cost per month, and how can I optimize it?”
 
-🧠 Problem Statement
+## 🧠 Problem Statement
 
 Modern cloud architectures are:
 
@@ -21,7 +21,8 @@ Complex (GCP, AWS, Azure mixed systems)
 Hard to estimate cost manually
 Difficult to optimize without deep FinOps knowledge
 Poorly documented in real-world scenarios
-🎯 Solution
+
+## 🎯 Solution
 
 We built a modular AI agent pipeline:
 
@@ -40,8 +41,9 @@ User Input (Architecture Description)
 📊 Optimization Engine (recommendations)
         ↓
 Final FinOps Report
-🏗️ Architecture
-1️⃣ Parser Agent
+
+## 🏗️ Architecture
+### 1️⃣ Parser Agent
 Purpose:
 
 Extract structured cloud components from natural language.
@@ -54,7 +56,8 @@ Extracts:
 name
 type
 region
-2️⃣ Schema Validator (NEW CORE LAYER)
+
+### 2️⃣ Schema Validator (NEW CORE LAYER)
 Purpose:
 
 Fix LLM hallucinations and inconsistent outputs.
@@ -68,7 +71,7 @@ Output:
 
 Always standardized JSON schema.
 
-3️⃣ Clarifier Agent
+### 3️⃣ Clarifier Agent
 Purpose:
 
 Detect missing information in architecture.
@@ -79,7 +82,8 @@ Missing storage size → infer default
 Missing compute type → flag or auto-fill
 Upgrade:
 Now smarter (auto-suggestions instead of excessive questioning)
-4️⃣ Expander Agent
+
+### 4️⃣ Expander Agent
 Purpose:
 
 Enrich architecture into real cloud pipelines.
@@ -100,7 +104,8 @@ Features:
 Rule-based expansion
 LLM-based fallback expansion
 Pipeline pattern detection (ETL, streaming, ingestion)
-5️⃣ Cost Engine (Multi-Cloud)
+
+### 5️⃣ Cost Engine (Multi-Cloud)
 Purpose:
 
 Estimate monthly infrastructure cost.
@@ -115,7 +120,8 @@ Features:
 Region multipliers
 Base pricing model
 Multi-service aggregation
-6️⃣ Optimization Engine (IN PROGRESS)
+
+### 6️⃣ Optimization Engine (IN PROGRESS)
 Purpose:
 
 Suggest cost savings and architecture improvements.
@@ -174,7 +180,7 @@ Dataflow → $0.10
 
 ✔ Improved via modular agent architecture
 
-🧠 Key Learnings
+### 🧠 Key Learnings
 LLMs are NOT reliable structured parsers
 Always need a validation + normalization layer
 Cost systems must be deterministic, not LLM-based
@@ -187,28 +193,33 @@ Clarifier       ✅ Stable
 Expander        ⚠️ Improving
 Cost Engine     ✅ Working
 Optimization Engine     🚧 In Progress
-🔮 Future Roadmap
-Phase 2 — Intelligence Upgrade
-1. 🧠 Dependency Graph Builder
+
+## 🔮 Future Roadmap
+### Phase 2 — Intelligence Upgrade
+#### 1. 🧠 Dependency Graph Builder
 Convert architecture into DAG
 Visual pipeline mapping
-2. 💡 Smart Optimization Engine
+
+#### 2. 💡 Smart Optimization Engine
 Auto cost reduction suggestions
 Multi-cloud substitution logic
-3. 🌍 Real Pricing Integration
+
+#### 3. 🌍 Real Pricing Integration
 AWS Pricing API
 GCP Billing Catalog API (restricted)
 Azure Retail Pricing API
-Phase 3 — Enterprise System
-4. 🧾 Architecture Report Generator
+
+## Phase 3 — Enterprise System
+#### 4. 🧾 Architecture Report Generator
 PDF reports
 Executive summaries
 FinOps dashboards
-5. 🤖 Self-Healing Pipeline Agent
+
+#### 5. 🤖 Self-Healing Pipeline Agent
 Detect broken parsing
 Auto-fix schema drift
 Retry failed LLM calls
-6. 📊 Visualization Layer
+#### 6. 📊 Visualization Layer
 Architecture diagrams
 Cost heatmaps
 Service dependency graphs
@@ -226,7 +237,8 @@ Multi-agent AI design
 LLM + deterministic hybrid systems
 FinOps automation
 Real-world cloud optimization logic
-👨‍💻 Tech Stack
+
+### 👨‍💻 Tech Stack
 Python 3.10+
 Ollama (Phi-3 / Mistral)
 Requests (API layer)
