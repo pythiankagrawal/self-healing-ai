@@ -1,6 +1,6 @@
 def build_dag(components):
     """
-    Very basic DAG builder based on common patterns
+    Smarter DAG ordering based on logical layers
     """
 
     order = {
@@ -12,15 +12,27 @@ def build_dag(components):
         "API Layer": 6
     }
 
-    return sorted(components, key=lambda x: order.get(x["type"], 99))
+    return sorted(components, key=lambda x: order.get(x.get("type"), 99))
 
 
+# -------------------------------------------
+# SAFE NODE NAME (MERMAID FIX)
+# -------------------------------------------
+def sanitize(name):
+    return name.replace(" ", "_").replace("-", "_")
+
+
+# -------------------------------------------
+# GENERATE MERMAID (FIXED)
+# -------------------------------------------
 def generate_mermaid(dag):
-    """
-    Generate Mermaid diagram
-    """
 
     lines = ["graph LR"]
+
+    if len(dag) == 1:
+        node = dag[0]["name"]
+        lines.append(f"{node}(({dag[0]['type']}))")
+        return "\n".join(lines)
 
     for i in range(len(dag) - 1):
         a = dag[i]["name"]
@@ -29,7 +41,9 @@ def generate_mermaid(dag):
 
     return "\n".join(lines)
 
-
+# -------------------------------------------
+# COST SUMMARY
+# -------------------------------------------
 def generate_cost_summary(breakdown):
     total = sum(x["cost"] for x in breakdown)
 
@@ -46,6 +60,9 @@ def generate_cost_summary(breakdown):
     return summary
 
 
+# -------------------------------------------
+# INSIGHTS ENGINE (IMPROVED)
+# -------------------------------------------
 def generate_insights(summary):
     insights = []
 
@@ -58,15 +75,25 @@ def generate_insights(summary):
         f"Highest cost component is {max_comp['name']} ({max_comp['type']}) contributing {max_comp['percent']}%"
     )
 
+    # Smarter recommendations
     if max_comp["type"] == "Compute":
-        insights.append("Consider autoscaling or smaller instance sizes")
+        insights.append("Consider autoscaling, spot instances, or smaller machine types")
 
-    if max_comp["type"] == "Data Warehouse":
-        insights.append("Consider partitioning or clustering to reduce cost")
+    elif max_comp["type"] == "Data Warehouse":
+        insights.append("Use partitioning, clustering, and avoid full table scans")
+
+    elif max_comp["type"] == "Object Storage":
+        insights.append("Use lifecycle policies (Nearline/Coldline/Archive)")
+
+    elif max_comp["type"] == "Streaming Queue":
+        insights.append("Reduce retention or batch messages if real-time is not required")
 
     return insights
 
 
+# -------------------------------------------
+# REPORT AGENT
+# -------------------------------------------
 def report_agent(components, cost_result):
     print("\n📊 Agent 4 (Report + DAG) starting...")
 

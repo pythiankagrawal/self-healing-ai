@@ -1,104 +1,23 @@
-from llm.ollama_client import call_ollama
-import json
-
 # -------------------------------------------
-# PIPELINE KNOWLEDGE BASE (SMARTER)
-# -------------------------------------------
-PIPELINE_PATTERNS = [
-    {
-        "keywords": ["data transfer", "etl", "ingestion", "pipeline"],
-        "components": [
-            {"name": "gcs", "type": "Object Storage"},
-            {"name": "bigquery", "type": "Data Warehouse"}
-        ]
-    },
-    {
-        "keywords": ["streaming", "real-time", "event"],
-        "components": [
-            {"name": "pubsub", "type": "Streaming Queue"},
-            {"name": "dataflow", "type": "Compute"},
-            {"name": "bigquery", "type": "Data Warehouse"}
-        ]
-    },
-    {
-        "keywords": ["api", "integration"],
-        "components": [
-            {"name": "api-gateway", "type": "API"},
-            {"name": "cloud-functions", "type": "Compute"}
-        ]
-    }
-]
-
-# -------------------------------------------
-# SAFE GETTERS
+# SAFE GETTER
 # -------------------------------------------
 def safe_get(comp, key, default=""):
     return comp.get(key, default) or default
 
 
 # -------------------------------------------
-# RULE-BASED EXPANSION (IMPROVED)
-# -------------------------------------------
-def rule_based_expand(component, full_context=""):
-    text = (safe_get(component, "name") + " " + full_context).lower()
-
-    for pattern in PIPELINE_PATTERNS:
-        if any(k in text for k in pattern["keywords"]):
-            print(f"⚡ Rule match: {pattern['keywords']}")
-            return pattern["components"]
-
-    return None
-
-
-# -------------------------------------------
-# LLM EXPANSION (ROBUST)
-# -------------------------------------------
-def llm_expand(component):
-    prompt = f"""
-You are a cloud architecture expert.
-
-Expand this component into real cloud services.
-
-RULES:
-- Return ONLY valid JSON list
-- No explanation
-- No markdown
-- Each item must have name + type
-
-Component:
-{json.dumps(component)}
-
-Output:
-"""
-
-    raw = call_ollama(prompt)
-
-    if not raw:
-        return []
-
-    try:
-        start = raw.find("[")
-        end = raw.rfind("]") + 1
-        data = json.loads(raw[start:end])
-
-        if isinstance(data, list):
-            return data
-
-    except Exception as e:
-        print("⚠️ LLM parse failed:", e)
-
-    return []
-
-
-# -------------------------------------------
-# DEDUPLICATION ENGINE
+# DEDUPLICATION
 # -------------------------------------------
 def deduplicate(components):
     seen = set()
     unique = []
 
     for c in components:
-        key = (c.get("name", ""), c.get("type", ""))
+        name = c.get("name", "").strip().lower()
+        ctype = c.get("type", "").strip().lower()
+
+        key = (name, ctype)
+
         if key not in seen:
             seen.add(key)
             unique.append(c)
@@ -107,80 +26,102 @@ def deduplicate(components):
 
 
 # -------------------------------------------
-# MAIN EXPANDER AGENT (FINAL)
+# MAIN EXPANDER AGENT (INTENT-AWARE)
 # -------------------------------------------
+def expander_agent(components, user_input="", intent=None):
 
-def expander_agent(components, user_input=""):
+    print("\n🤖 Agent 2.5 (Expander) starting...")
 
-    expanded = []
+    expanded = list(components)
 
-    for c in components:
+    intent_type = intent.get("intent") if intent else "UNKNOWN"
 
-        expanded.append(c)
+    # -------------------------------------------
+    # DETECT EXISTING COMPONENTS
+    # -------------------------------------------
+    has_storage = any(c.get("type") == "Object Storage" for c in components)
+    has_bq = any(c.get("type") == "Data Warehouse" for c in components)
+    has_stream = any(c.get("type") == "Streaming Queue" for c in components)
+    has_compute = any(c.get("type") == "Compute" for c in components)
 
-        t = c["type"].lower()
+    region = components[0].get("region", "global") if components else "global"
 
-        # only ADD, never replace
+    # -------------------------------------------
+    # INTENT-BASED EXPANSION (CORE FIX)
+    # -------------------------------------------
 
-        if "storage" in t:
+    # 🚫 LOGGING → DO NOT expand
+    if intent_type == "LOGGING":
+        print("⚡ Logging intent → no expansion needed")
+        return components
+
+    # 📦 STORAGE → minimal
+    if intent_type == "STORAGE":
+        print("⚡ Storage intent → no expansion")
+        return components
+
+    # 🔄 ETL PIPELINE
+    if intent_type == "ETL":
+        print("⚡ ETL intent detected")
+
+        if has_storage and has_bq and not has_stream:
             expanded.append({
                 "name": "pubsub-event-stream",
                 "type": "Streaming Queue",
-                "region": c.get("region")
+                "region": region
             })
 
-        if "streaming" in t:
+        if not has_compute:
             expanded.append({
                 "name": "dataflow-processor",
                 "type": "Compute",
-                "region": c.get("region")
+                "region": region
             })
 
+    # ⚡ STREAMING PIPELINE
+    elif intent_type == "STREAMING":
+        print("⚡ Streaming intent detected")
+
+        if not has_stream:
+            expanded.append({
+                "name": "pubsub-event-stream",
+                "type": "Streaming Queue",
+                "region": region
+            })
+
+        if not has_compute:
+            expanded.append({
+                "name": "dataflow-processor",
+                "type": "Compute",
+                "region": region
+            })
+
+    # 🔗 API INTENT
+    elif intent_type == "API":
+        print("⚡ API intent detected")
+
+        expanded.append({
+            "name": "api-gateway",
+            "type": "API Layer",
+            "region": region
+        })
+
+    # ❓ UNKNOWN → fallback to light inference
+    else:
+        print("⚠️ Unknown intent → using safe fallback")
+
+        if has_storage and has_bq and not has_stream:
+            expanded.append({
+                "name": "pubsub-event-stream",
+                "type": "Streaming Queue",
+                "region": region
+            })
+
+    # -------------------------------------------
+    # FINAL CLEANUP
+    # -------------------------------------------
+    expanded = deduplicate(expanded)
+
+    print("✅ Final Expanded Components:", expanded)
+
     return expanded
-
-
-# def expander_agent(components, user_input=""):
-#     print("\n🤖 Agent 2.5 (Expander) starting...")
-# 
-#     expanded = []
-# 
-#     for comp in components:
-#         name = safe_get(comp, "name")
-#         ctype = safe_get(comp, "type", "Unknown")
-# 
-#         # ---------------------------------------
-#         # 1. Skip already detailed components
-#         # ---------------------------------------
-#         if ctype != "Unknown" and len(name) < 5:
-#             expanded.append(comp)
-#             continue
-# 
-#         # ---------------------------------------
-#         # 2. RULE-BASED EXPANSION
-#         # ---------------------------------------
-#         rule_result = rule_based_expand(comp, user_input)
-# 
-#         if rule_result:
-#             expanded.extend(rule_result)
-#             continue
-# 
-#         # ---------------------------------------
-#         # 3. LLM EXPANSION
-#         # ---------------------------------------
-#         print(f"🤖 Expanding via LLM: {name}")
-#         llm_result = llm_expand(comp)
-# 
-#         if llm_result:
-#             expanded.extend(llm_result)
-#         else:
-#             print("⚠️ Keeping original (no expansion)")
-#             expanded.append(comp)
-# 
-#     # -------------------------------------------
-#     # 4. CLEAN OUTPUT
-#     # -------------------------------------------
-#     expanded = deduplicate(expanded)
-# 
-#     print("✅ Final Expanded Components:", expanded)
-# 
-#     return expanded
