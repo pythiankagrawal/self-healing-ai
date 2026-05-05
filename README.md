@@ -210,7 +210,7 @@ Insight:
 Optimization:
 - Replace streaming with batch load if real-time not needed
 
-
+```
 ### ⚠️ Key Challenges Solved
 Problem	                  Solution
 LLM hallucinations	 Schema Validator
