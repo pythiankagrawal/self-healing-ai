@@ -187,28 +187,301 @@ gcs → pubsub → dataflow → bigquery
 
 ## 🧪 Example
 
-### Input:
+🚀 Intelligent FinOps Advisor
+----------------------------------
+Paste your architecture (press ENTER twice to finish):
 
-Load data from GCS to BigQuery daily
+loads logs data into gcs
 
 
-### Output:
+🤖 Intelligent Parser Agent starting...
 
-#### Components:
-```json
+🔍 RAW PARSER OUTPUT:
+["gcs"]
+
+🧠 EXTRACTED SERVICES:
+['gcs']
+
+✅ FINAL PARSED COMPONENTS
 [
-  {"name": "gcs", "type": "Object Storage"},
-  {"name": "bigquery", "type": "Data Warehouse"},
-  {"name": "pubsub", "type": "Streaming Queue"},
-  {"name": "dataflow", "type": "Compute"}
+  {
+    "name": "gcs",
+    "type": "Object Storage",
+    "provider": "gcp",
+    "region": "global"
+  }
 ]
 
-Cost:
-TOTAL COST: $0.158
-Insight:
-- Dataflow (Compute) contributes ~63% cost
-Optimization:
-- Replace streaming with batch load if real-time not needed
+🧠 LLM-Only Intent Agent starting...
+
+🔍 RAW INTENT OUTPUT:
+ ```json
+{
+  "primary_intent": "Load logs data into GCS",
+  "secondary_intents": [],
+  "architecture_pattern": "",
+  "workload_characteristics": {
+    "stateful": false,
+    "event_driven": false,
+    "latency_sensitive": false,
+    "compute_intensive": false,
+    "storage_intensive": false
+  },
+  "signals": {
+    "frequency": "",
+    "realtime": false,
+    "batch": true,
+    "cloud_provider": "gcp",
+    "region": "global"
+  },
+  "components_detected": [
+    {
+      "name": "gcs",
+      "type": "Object Storage",
+      "provider": "gcp",
+      "region": "global"
+    }
+  ],
+  "missing_information": [],
+  "confidence": 0.8
+}
+```
+
+✅ FINAL INTENT ANALYSIS
+{
+  "primary_intent": "Load logs data into GCS",
+  "secondary_intents": [],
+  "architecture_pattern": "",
+  "workload_characteristics": {
+    "stateful": false,
+    "event_driven": false,
+    "latency_sensitive": false,
+    "compute_intensive": false,
+    "storage_intensive": false
+  },
+  "signals": {
+    "frequency": "",
+    "realtime": false,
+    "batch": true,
+    "cloud_provider": "gcp",
+    "region": "global"
+  },
+  "components_detected": [
+    {
+      "name": "gcs",
+      "type": "Object Storage",
+      "provider": "gcp",
+      "region": "global"
+    }
+  ],
+  "missing_information": [],
+  "confidence": 0.8,
+  "source": "llm"
+}
+
+🤖 Intelligent Expander Agent starting...
+
+🔍 RAW EXPANDER OUTPUT:
+[
+  {
+    "name": "pubsub",
+    "region": "us-east1"
+  }
+]
+
+✅ FINAL EXPANDED ARCHITECTURE
+[
+  {
+    "name": "gcs",
+    "type": "Object Storage",
+    "provider": "gcp",
+    "region": "global"
+  },
+  {
+    "name": "pubsub",
+    "type": "Streaming Queue",
+    "provider": "gcp",
+    "region": "us-east1"
+  }
+]
+
+🤖 Intelligent Clarifier Agent starting...
+⚠️ Retry 1 failed: Timeout
+
+🔍 RAW CLARIFIER OUTPUT:
+[
+  {
+    "field": "data_size_per_day",
+    "question": "How much data is processed per day (GB/TB)?"
+  },
+  {
+    "field": "retention_days",
+    "question": "How long should logs/data be retained?"
+  },
+  {
+    "field": "throughput_mb_per_sec",
+    "question": "What is the expected throughput in MB/second for streaming data?"
+  },
+  {
+    "field": "compute_hours_per_day",
+    "question": "How many hours per day are required for compute processing?"
+  },
+  {
+    "field": "monthly_storage",
+    "question": "What is the estimated monthly storage requirement (GB/TB)?"
+  }
+]
+
+🧠 Intelligent Workload Questions:
+
+→ How much data is processed per day (GB/TB)?: 10 GB
+→ How long should logs/data be retained?: 10 days
+→ What is the expected throughput in MB/second for streaming data?: 3 mb/sec
+→ How many hours per day are required for compute processing?: 3 hours
+→ What is the estimated monthly storage requirement (GB/TB)?: 100 GB
+
+✅ ENRICHED WORKLOAD PROFILE
+[
+  {
+    "name": "gcs",
+    "type": "Object Storage",
+    "provider": "gcp",
+    "region": "global",
+    "workload_profile": {
+      "data_size_per_day": "10 GB",
+      "retention_days": "10 days",
+      "throughput_mb_per_sec": "3 mb/sec",
+      "compute_hours_per_day": "3 hours",
+      "monthly_storage": "100 GB"
+    }
+  },
+  {
+    "name": "pubsub",
+    "type": "Streaming Queue",
+    "provider": "gcp",
+    "region": "us-east1",
+    "workload_profile": {
+      "data_size_per_day": "10 GB",
+      "retention_days": "10 days",
+      "throughput_mb_per_sec": "3 mb/sec",
+      "compute_hours_per_day": "3 hours",
+      "monthly_storage": "100 GB"
+    }
+  }
+]
+
+📦 FINAL COMPONENTS:
+[{'name': 'gcs', 'type': 'Object Storage', 'provider': 'gcp', 'region': 'global', 'workload_profile': {'data_size_per_day': '10 GB', 'retention_days': '10 days', 'throughput_mb_per_sec': '3 mb/sec', 'compute_hours_per_day': '3 hours', 'monthly_storage': '100 GB'}}, {'name': 'pubsub', 'type': 'Streaming Queue', 'provider': 'gcp', 'region': 'us-east1', 'workload_profile': {'data_size_per_day': '10 GB', 'retention_days': '10 days', 'throughput_mb_per_sec': '3 mb/sec', 'compute_hours_per_day': '3 hours', 'monthly_storage': '100 GB'}}]
+
+💰 Intelligent Cost Agent starting...
+⚠️ Retry 1 failed: Timeout
+
+🔍 RAW COST OUTPUT:
+{
+  "total_cost": 20.0,
+  "currency": "USD",
+  "breakdown": [
+    {
+      "name": "gcs",
+      "type": "Object Storage",
+      "monthly_cost": 5.0,
+      "reason": "Baseline cost for object storage"
+    },
+    {
+      "name": "pubsub",
+      "type": "Streaming Queue",
+      "monthly_cost": 15.0,
+      "reason": "Baseline cost for streaming queue, including compute hours"
+    }
+  ],
+  "assumptions": [
+    "Assuming baseline costs and no additional features or optimizations."
+  ],
+  "optimizations": [
+    "Consider using more cost-effective storage classes if data access patterns allow."
+  ]
+}
+
+💰 FINAL COST REPORT
+{
+  "total_cost": 20.0,
+  "currency": "USD",
+  "breakdown": [
+    {
+      "name": "gcs",
+      "type": "Object Storage",
+      "monthly_cost": 5.0,
+      "reason": "Baseline cost for object storage"
+    },
+    {
+      "name": "pubsub",
+      "type": "Streaming Queue",
+      "monthly_cost": 15.0,
+      "reason": "Baseline cost for streaming queue, including compute hours"
+    }
+  ],
+  "assumptions": [
+    "Assuming baseline costs and no additional features or optimizations."
+  ],
+  "optimizations": [
+    "Consider using more cost-effective storage classes if data access patterns allow."
+  ]
+}
+
+📊 Intelligent Report Agent starting...
+
+====================================
+📘 FINAL FINOPS ARCHITECTURE REPORT
+====================================
+
+🧠 EXECUTIVE SUMMARY:
+This architecture represents a Load logs data into GCS workload using 2 cloud services following a  design with an estimated monthly cost of $20.0.
+
+🏗️ ARCHITECTURE COMPONENTS:
+- pubsub (Streaming Queue) [us-east1]
+- gcs (Object Storage) [global]
+
+📈 MERMAID DIAGRAM:
+graph LR
+pubsub["pubsub<br/>Streaming Queue"]
+gcs["gcs<br/>Object Storage"]
+pubsub --> gcs
+
+💰 TOTAL ESTIMATED MONTHLY COST:
+$20.0
+
+📦 COST BREAKDOWN:
+- gcs (Object Storage) → $5.0
+- pubsub (Streaming Queue) → $15.0
+
+⚠️ RISKS:
+- Streaming workloads should include monitoring/alerting
+
+🧠 RECOMMENDATIONS:
+- Enable lifecycle tiering for object storage
+- Tune retention and throughput settings for streaming workloads
+
+====================================
+
+====================================
+💰 FINAL FINOPS REPORT
+====================================
+
+TOTAL COST: 20.0 USD
+
+BREAKDOWN:
+- gcs (Object Storage) → $5.0
+  Reason: Baseline cost for object storage
+- pubsub (Streaming Queue) → $15.0
+  Reason: Baseline cost for streaming queue, including compute hours
+
+📘 ASSUMPTIONS:
+- Assuming baseline costs and no additional features or optimizations.
+
+🧠 OPTIMIZATIONS:
+- Consider using more cost-effective storage classes if data access patterns allow.
+
+====================================
 
 ```
 ### ⚠️ Key Challenges Solved
