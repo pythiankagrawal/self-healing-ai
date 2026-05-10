@@ -183,6 +183,7 @@ gcs → pubsub → dataflow → bigquery
 - Suggest batch vs streaming
 - Region optimization
 
+```
 ---
 
 ## 🧪 Example
@@ -482,6 +483,7 @@ BREAKDOWN:
 - Consider using more cost-effective storage classes if data access patterns allow.
 
 ====================================
+```
 
 ```
 ### ⚠️ Key Challenges Solved
