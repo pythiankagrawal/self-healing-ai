@@ -1,139 +1,124 @@
 from llm.ollama_client import call_ollama
 import json
+import re
 
 
-# -------------------------------------------
-# INTENT KEYWORDS (WEIGHTED)
-# -------------------------------------------
-INTENT_KEYWORDS = {
-    "LOGGING": ["log", "logging", "monitoring"],
-    "ETL": ["etl", "pipeline", "batch", "ingestion", "transform", "load"],
-    "STREAMING": ["stream", "real-time", "event", "kafka", "pubsub"],
-    "STORAGE": ["store", "storage", "archive", "backup"],
-    "API": ["api", "endpoint", "integration", "service"]
-}
+# =========================================================
+# STRICT JSON EXTRACTION (NO FIXES, NO GUESSING)
+# =========================================================
+def extract_json(raw):
+
+    if not raw:
+        return None
+
+    raw = raw.replace("```json", "").replace("```", "").strip()
+
+    start = raw.find("{")
+    end = raw.rfind("}")
+
+    if start == -1 or end == -1:
+        return None
+
+    try:
+        return json.loads(raw[start:end + 1])
+    except Exception:
+        return None
 
 
-# -------------------------------------------
-# NORMALIZE INTENT (CRITICAL)
-# -------------------------------------------
-def normalize_intent(intent):
-    if not intent:
-        return "UNKNOWN"
+# =========================================================
+# INTENT AGENT (PURE LLM)
+# =========================================================
+def intent_agent(user_input, components=None):
 
-    intent = intent.strip().upper()
+    print("\n🧠 LLM-Only Intent Agent starting...")
 
-    if intent in INTENT_KEYWORDS:
-        return intent
-
-    return "UNKNOWN"
-
-
-# -------------------------------------------
-# SCORE-BASED RULE CLASSIFIER (IMPROVED)
-# -------------------------------------------
-def rule_based_intent(text):
-    text = (text or "").lower()
-
-    scores = {intent: 0 for intent in INTENT_KEYWORDS}
-
-    for intent, keywords in INTENT_KEYWORDS.items():
-        for k in keywords:
-            if k in text:
-                scores[intent] += 1
-
-    # get best intent
-    best_intent = max(scores, key=scores.get)
-    best_score = scores[best_intent]
-
-    if best_score == 0:
-        return None, 0.0
-
-    # confidence = normalized score
-    total_hits = sum(scores.values())
-    confidence = round(best_score / total_hits, 2) if total_hits else 0.0
-
-    return best_intent, confidence
-
-
-# -------------------------------------------
-# LLM CLASSIFIER
-# -------------------------------------------
-def llm_classify_intent(user_input):
     prompt = f"""
-You are a cloud architecture expert.
+You are a senior cloud architect and FinOps intelligence system.
 
-Classify the intent into ONE:
+Your job is to deeply understand cloud architecture intent.
 
-STORAGE
-ETL
-STREAMING
-LOGGING
-API
-UNKNOWN
+You MUST behave like a reasoning model.
 
-RULES:
-- Return ONLY JSON
-- No explanation
+Do NOT guess blindly.
+Do NOT ignore details like frequency or services.
+Do NOT normalize or simplify user intent.
 
-Input:
+==================================================
+INPUT
+==================================================
+
+USER REQUEST:
 {user_input}
 
-Output:
-{{"intent": "ETL", "confidence": 0.9}}
+PARSED COMPONENTS:
+{json.dumps(components or [], indent=2)}
+
+==================================================
+TASK
+==================================================
+
+Infer a FULL structured understanding of:
+
+1. primary_intent
+2. secondary_intents
+3. architecture_pattern
+4. workload_characteristics
+5. signals (VERY IMPORTANT)
+6. components_detected
+7. missing_information
+8. confidence
+
+==================================================
+CRITICAL RULES
+==================================================
+
+- If user says "every 30 mins" → MUST output exactly "every_30_mins"
+- If user says "realtime" → must reflect realtime=true
+- DO NOT override user-specified frequency
+- DO NOT generalize (no "daily" unless user says daily)
+- DO NOT hallucinate services not in input
+- If unsure → use UNKNOWN, not guess
+
+==================================================
+OUTPUT FORMAT (STRICT JSON ONLY)
+==================================================
+
+{{
+  "primary_intent": "",
+  "secondary_intents": [],
+  "architecture_pattern": "",
+  "workload_characteristics": {{
+    "stateful": false,
+    "event_driven": false,
+    "latency_sensitive": false,
+    "compute_intensive": false,
+    "storage_intensive": false
+  }},
+  "signals": {{
+    "frequency": "",
+    "realtime": false,
+    "batch": false,
+    "cloud_provider": "",
+    "region": ""
+  }},
+  "components_detected": [],
+  "missing_information": [],
+  "confidence": 0.0
+}}
 """
 
     raw = call_ollama(prompt)
 
-    if not raw:
-        return {"intent": "UNKNOWN", "confidence": 0.0}
+    print("\n🔍 RAW INTENT OUTPUT:\n", raw)
 
-    try:
-        start = raw.find("{")
-        end = raw.rfind("}") + 1
-        data = json.loads(raw[start:end])
+    data = extract_json(raw)
 
-        intent = normalize_intent(data.get("intent"))
-        confidence = float(data.get("confidence", 0.5))
+    if not data:
+        raise Exception("Intent Agent failed: Invalid JSON from LLM")
 
-        return {
-            "intent": intent,
-            "confidence": confidence
-        }
+    data["source"] = "llm"
 
-    except Exception as e:
-        print("⚠️ LLM intent parse failed:", e)
+    print("\n✅ FINAL INTENT ANALYSIS")
+    print(json.dumps(data, indent=2))
 
-    return {"intent": "UNKNOWN", "confidence": 0.0}
-
-
-# -------------------------------------------
-# MAIN INTENT AGENT (FINAL)
-# -------------------------------------------
-def intent_agent(user_input):
-    print("\n🧠 Intent Agent starting...")
-
-    # ---------------------------------------
-    # 1. Rule-based (fast + reliable)
-    # ---------------------------------------
-    intent, confidence = rule_based_intent(user_input)
-
-    if intent and confidence >= 0.6:
-        print(f"⚡ Rule-based intent: {intent} ({confidence})")
-        return {
-            "intent": intent,
-            "confidence": confidence,
-            "source": "rule"
-        }
-
-    # ---------------------------------------
-    # 2. LLM fallback (only if needed)
-    # ---------------------------------------
-    print("🤖 Using LLM for intent classification...")
-    result = llm_classify_intent(user_input)
-
-    print(f"✅ LLM intent: {result}")
-
-    result["source"] = "llm"
-
-    return result
+    return data
